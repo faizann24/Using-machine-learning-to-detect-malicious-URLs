@@ -9,68 +9,44 @@ reload(sys)
 sys.setdefaultencoding('utf-8')
 from sklearn.linear_model import LogisticRegression
 
-
 def getTokens(input):
-	tokensBySlash = str(input.encode('utf-8')).split('/')
+	tokensBySlash = str(input.encode('utf-8')).split('/')	#get tokens after splitting by slash
 	allTokens = []
 	for i in tokensBySlash:
-		tokens = str(i).split('-')
+		tokens = str(i).split('-')	#get tokens after splitting by dash
 		tokensByDot = []
 		for j in range(0,len(tokens)):
-			tempTokens = str(tokens[j]).split('.')
+			tempTokens = str(tokens[j]).split('.')	#get tokens after splitting by dot
 			tokensByDot = tokensByDot + tempTokens
 		allTokens = allTokens + tokens + tokensByDot
-	allTokens = list(set(allTokens))
+	allTokens = list(set(allTokens))	#remove redundant tokens
 	if 'com' in allTokens:
-		allTokens.remove('com')
+		allTokens.remove('com')	#removing .com since it occurs a lot of times and it should not be included in our features
 	return allTokens
 
-allurls = 'C:\\Users\\Faizan Ahmad\\Desktop\\Url Classification Project\\Data to Use\\allurls.txt'
-allurlscsv = pd.read_csv(allurls,',',error_bad_lines=False)
-allurlsdata = pd.DataFrame(allurlscsv)
+allurls = 'C:\\Users\\Faizan Ahmad\\Desktop\\Url Classification Project\\Data to Use\\allurls.txt'	#path to our all urls file
+allurlscsv = pd.read_csv(allurls,',',error_bad_lines=False)	#reading file
+allurlsdata = pd.DataFrame(allurlscsv)	#converting to a dataframe
 
-allurlsdata = np.array(allurlsdata)
+allurlsdata = np.array(allurlsdata)	#converting it into an array
+random.shuffle(allurlsdata)	#shuffling
 
-badurls = []
+y = [d[1] for d in allurlsdata]	#all labels 
+corpus = [d[0] for d in allurlsdata]	#all urls corresponding to a label (either good or bad)
+vectorizer = TfidfVectorizer(tokenizer=getTokens)	#get a vector for each url but use our customized tokenizer
+X = vectorizer.fit_transform(corpus)	#get the X vector
 
-alltokens = []
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)	#split into training and testing set 80/20 ratio
 
-s = ''
-for i in allurlsdata:
-	if i[1] == 'bad':
-		badurls.append(i[0])
-	tokens = getTokens(str(i[0]))
-	for j in tokens:
-		alltokens.append(j)
-		
-
-print alltokens.count('virus')
-
-#s = str(badurls)
-#wc = WordCloud(max_words=100).generate(s)
-#plt.imshow(wc)
-#plt.show()
-
-random.shuffle(allurlsdata)
-
-y = [d[1] for d in allurlsdata]
-corpus = [d[0] for d in allurlsdata]
-vectorizer = TfidfVectorizer(tokenizer=getTokens)
-X = vectorizer.fit_transform(corpus)
-
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-
-print len(y_test)
-print len(y_train)
-
-lgs = LogisticRegression()
+lgs = LogisticRegression()	#using logistic regression
 lgs.fit(X_train, y_train)
-print(lgs.score(X_test, y_test))
+print(lgs.score(X_test, y_test))	#pring the score. It comes out to be 98%
 
+#checking some random URLs. The results come out to be expected. The first two are okay and the last four are malicious/phishing/bad
 X_predict = ['wikipedia.com','google.com/search=faizanahad','pakistanifacebookforever.com/getpassword.php/','www.radsport-voggel.de/wp-admin/includes/log.exe','ahrenhei.without-transfer.ru/nethost.exe','www.itidea.it/centroesteticosothys/img/_notes/gum.exe']
 X_predict = vectorizer.transform(X_predict)
 y_Predict = lgs.predict(X_predict)
-print y_Predict
+print y_Predict	#printing predicted values
 
 dataset = np.ndarray(shape=(2,3),dtype=np.float32)
 
