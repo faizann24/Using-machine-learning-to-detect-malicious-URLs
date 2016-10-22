@@ -7,3 +7,12 @@ Using machine learning to detect maclicious URLs, We at Fsecurify used machine l
 http://fsecurify.com/using-machine-learning-detect-malicious-urls/
 
 
+wikipedia.com (Good Url)
+google.com/search=faizanahad (Good Url)
+pakistanifacebookforever.com/getpassword.php/ (Bad Url)
+www.radsport-voggel.de/wp-admin/includes/log.exe (Bad Url)
+ahrenhei.without-transfer.ru/nethost.exe (Bad Url)
+www.itidea.it/centroesteticosothys/img/_notes/gum.exe (Bad Url)
+
+
+
