@@ -48,24 +48,3 @@ X_predict = vectorizer.transform(X_predict)
 y_Predict = lgs.predict(X_predict)
 print y_Predict	#printing predicted values
 
-dataset = np.ndarray(shape=(2,3),dtype=np.float32)
-
-
-#xx,yy = X_test.shape
-#test = np.reshape(test, (2,yy))
-
-#print test
-
-#rint lgs.predict(X_test)
-
-
-
-
-
-
-
-'''
-vector = CountVectorizer(tokenizer=getTokens)
-data = vector.fit_transform(string).toarray()
-print data'''
-
