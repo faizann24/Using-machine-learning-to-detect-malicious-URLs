@@ -1,4 +1,4 @@
-
+from sklearn.cross_validation import train_test_split
 from sklearn.feature_extraction.text import CountVectorizer
 import pandas as pd
 import numpy as np
@@ -8,6 +8,7 @@ import sys
 reload(sys)
 sys.setdefaultencoding('utf-8')
 from sklearn.linear_model import LogisticRegression
+import os
 
 def getTokens(input):
 	tokensBySlash = str(input.encode('utf-8')).split('/')	#get tokens after splitting by slash
@@ -24,7 +25,9 @@ def getTokens(input):
 		allTokens.remove('com')	#removing .com since it occurs a lot of times and it should not be included in our features
 	return allTokens
 
-allurls = 'C:\\Users\\Faizan Ahmad\\Desktop\\Url Classification Project\\Data to Use\\allurls.txt'	#path to our all urls file
+#allurls = 'C:\\Users\\Faizan Ahmad\\Desktop\\Url Classification Project\\Data to Use\\allurls.txt'	#path to our all urls file
+cwd = os.path.dirname(os.path.abspath(__file__))
+allurls = os.path.join(cwd, 'data', 'data.csv')
 allurlscsv = pd.read_csv(allurls,',',error_bad_lines=False)	#reading file
 allurlsdata = pd.DataFrame(allurlscsv)	#converting to a dataframe
 
