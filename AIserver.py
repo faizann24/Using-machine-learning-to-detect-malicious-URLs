@@ -1,21 +1,22 @@
-from functools import wraps
-from flask import Flask
-from flask import request, Response
-from subprocess import call
-from flask import render_template
-
-from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.model_selection import train_test_split
-import pandas as pd
-import numpy as np
-import random
-from sklearn.feature_extraction.text import TfidfVectorizer
-import sys
-import os
-from sklearn.linear_model import LogisticRegression
 
 import math
+import random
+import sys
+import os
+
+import pandas as pd
+import numpy as np
+
+
 from collections import Counter
+from flask import Flask, request, Response, render_template
+from functools import wraps
+from subprocess import call
+
+from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+
 
 app = Flask(__name__)
 
@@ -25,26 +26,13 @@ def entropy(s):
 	return -sum( count/lns * math.log(count/lns, 2) for count in p.values())
 
 def getTokens(input):
-	tokensBySlash = str(input.encode('utf-8')).split('/')	#get tokens after splitting by slash
-	allTokens = []
-	for i in tokensBySlash:
-		tokens = str(i).split('-')	#get tokens after splitting by dash
-		tokensByDot = []
-		for j in range(0,len(tokens)):
-			tempTokens = str(tokens[j]).split('.')	#get tokens after splitting by dot
-			tokensByDot = tokensByDot + tempTokens
-		allTokens = allTokens + tokens + tokensByDot
-	allTokens = list(set(allTokens))	#remove redundant tokens
+	allTokens = list(set([str(i).split('.') for i in [str(i).split('-') for i in str(input.encode('utf-8')).split('/')]]))
 	if 'com' in allTokens:
 		allTokens.remove('com')	#removing .com since it occurs a lot of times and it should not be included in our features
 	return allTokens
 
 def TL():
-	allurls = './data/data.csv'	#path to our all urls file
-	allurlscsv = pd.read_csv(allurls,',',error_bad_lines=False)	#reading file
-	allurlsdata = pd.DataFrame(allurlscsv)	#converting to a dataframe
-
-	allurlsdata = np.array(allurlsdata)	#converting it into an array
+	allurlsdata = np.array(pd.DataFrame(pd.read_csv("./data/data.csv", ",", error_bad_lines=False)))
 	random.shuffle(allurlsdata)	#shuffling
 
 	y = [d[1] for d in allurlsdata]	#all labels 
@@ -56,21 +44,18 @@ def TL():
 
 	lgs = LogisticRegression()	#using logistic regression
 	lgs.fit(X_train, y_train)
-	print(lgs.score(X_test, y_test))	#pring the score. It comes out to be 98%
+	print(lgs.score(X_test, y_test))	#print the score. It comes out to be 98%
 	return vectorizer, lgs
 
 @app.route('/<path:path>')
 def show_index(path):
-	X_predict = []
-	X_predict.append(str(path))
-	X_predict = vectorizer.transform(X_predict)
+	X_predict = vectorizer.transform([str(path)])
 	y_Predict = lgs.predict(X_predict)
 	return '''
-You asked for %s
-
-AI output: %s 
-Entropy: %s 
-''' % (path, str(y_Predict), str(entropy(path)))	
+		You asked for %s
+		AI output: %s 
+		Entropy: %s 
+	''' % (path, str(y_Predict), str(entropy(path)))	
 
 port = os.getenv('VCAP_APP_PORT', 5000)
 if __name__ == "__main__":
@@ -81,10 +66,6 @@ if __name__ == "__main__":
 #checking some random URLs. The results come out to be expected. The first two are okay and the last four are malicious/phishing/bad
 
 #X_predict = ['wikipedia.com','google.com/search=faizanahad','pakistanifacebookforever.com/getpassword.php/','www.radsport-voggel.de/wp-admin/includes/log.exe','ahrenhei.without-transfer.ru/nethost.exe','www.itidea.it/centroesteticosothys/img/_notes/gum.exe']
-
 #X_predict = vectorizer.transform(X_predict)
-
 #y_Predict = lgs.predict(X_predict)
-
 #print(y_Predict)	#printing predicted values
-
